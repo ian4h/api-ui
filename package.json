@@ -4,11 +4,12 @@
   "description": "Guru API ui",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server"
+    "dev": "webpack-dev-server"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.9.1",
     "babel-core": "^6.6.5",
     "babel-loader": "^6.2.4",
     "babel-plugin-add-module-exports": "^0.1.2",

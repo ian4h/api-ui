@@ -6,8 +6,13 @@ import React from 'react'
 
 class CustomerList extends React.Component {
 
-    constructor(){
-        super()
+    constructor(props){
+        super(props)
+        this.state = {
+            customers: []
+        }
+        console.log("PROPS!")
+        console.log(this.props)
     }
 
     showCreateCustomer(e){
@@ -15,11 +20,11 @@ class CustomerList extends React.Component {
     }
 
     render(){
-        //this.props.showList(false)
         return(
             <div>
                 <button onClick={this.showCreateCustomer.bind(this)}>Create New Customer</button>
                 <h2>Customer List</h2>
+                {this.props.customers}
             </div>
         )
     }

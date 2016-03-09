@@ -13,7 +13,8 @@ module.exports = {
     },
     devServer: {
         inline: true,
-        port: 3000
+        port: 3000,
+        headers: { "Access-Control-Allow-Origin": "*" }
     },
     module: {
         loaders: [
