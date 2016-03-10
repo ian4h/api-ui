@@ -15,7 +15,7 @@ export default class Nav extends React.Component {
             //float: 'left',
             border: '1px solid',
             height: '100%',
-            width: '250px',
+            width: '200px',
             position: 'fixed', /* Stay in place */
             //zIndex: '1',
             top: '0',

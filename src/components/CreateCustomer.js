@@ -18,52 +18,29 @@ class CreateCustomer extends React.Component {
         }
     }
 
+    onFormSuccess(){
+        console.log("On Form Success Method")
+        this.props.updateCustomers()
+    }
+
     handleFormSubmit(e){
         e.preventDefault()
-        console.log("Form Submission");
-        console.log(this.state);
-
-        var config = {
-            //headers: {
-            //    'Authorization': 'Basic '+ btoa("username:password")
-            //},
-            auth: {
-                username: 'username',
-                password: 'password'
-            },
-            withCredentials: true,
-            data: this.state
-        };
-
-        var data = this.state;
-        console.log("NEW CONFIG")
-        console.log(config)
-        $.ajax({
+        var request = $.ajax({
             type: 'POST',
             url: 'http://localhost:8080/customers',
             beforeSend: function(xhr) {
                 xhr.setRequestHeader('Authorization', 'Basic '+ btoa("username:password"))
             },
             data: JSON.stringify(this.state),
-            success: function(data){
-                console.log("Success!")
-                console.log(data)
-            },
             dataType: 'json'
-        })
-        //axios.post('http://localhost:8080/customers', config)
-        //    .then(function(response){
-        //        console.log("Post Response >>> " );
-        //        console.log(response)
-        //    })
-        //    .catch(function(err){
-        //        console.log("Axios error");
-        //        console.log(err);
-        //    })
-    }
-
-    showCustomerList(){
-        this.props.showList(true)
+        });
+        request.success((data) => {
+            this.onFormSuccess()
+            console.log("Success")
+        });
+        request.fail((data) => {
+            console.log("Failure!", data)
+        });
     }
 
     handleChange(field, e){
@@ -76,7 +53,6 @@ class CreateCustomer extends React.Component {
         console.log(this.state)
         return(
             <div className="customer-form">
-                <button onClick={this.showCustomerList.bind(this)}>Show Customer List</button>
                 <form action="" onSubmit={this.handleFormSubmit.bind(this)}>
                     <h2>Create New Customer</h2>
                     <label for="name">Customer Name:</label>
