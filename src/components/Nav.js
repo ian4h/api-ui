@@ -24,11 +24,6 @@ export default class Nav extends React.Component {
     }
 
     render(){
-        //var divStyle = {
-        //    float: 'left',
-        //    border: '1px solid'
-        //};
-        console.log(this.props);
         return(
             <div style={this.divStyle}>
                 <ul>

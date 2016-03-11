@@ -19,26 +19,19 @@ class CustomerList extends React.Component {
         }
     }
 
-    /**
-     *                 <Griddle
-     results={this.props.customers}
-     showSettings={true}
-     resultsPerPage={25}
-     columns={columns}
-     columnMetadata={columnMeta}
-     testProp="test"
-     />
-     * @param e
-     */
+    //componentWillReceiveProps(){
+    //    console.log("componentWillReceiveProps *****************************************************")
+    //    console.log(this.state)
+    //    this.setState({customers: this.props.customers})
+    //    console.log(this.state)
+    //    console.log("Pros custmoers ? ", this.props.customers)
+    //}
 
     showCreateCustomer(e){
         this.props.showList(false)
     }
 
     deleteCustomer(e){
-        console.log("Delete Customer")
-        console.log(e)
-        console.log(e.currentTarget.id)
         var request = $.ajax({
             type: 'DELETE',
             url: 'http://localhost:8080/customers/'+e.currentTarget.id,
@@ -49,7 +42,7 @@ class CustomerList extends React.Component {
         request.success((response) => {
             console.log("SuccessFul Delete >> " );
             console.log(response);
-            this.props.updateCustomers()
+            this.props.getCustomers()
         })
         request.fail((response) => {
             console.log("Failure")
@@ -57,26 +50,12 @@ class CustomerList extends React.Component {
         })
     }
 
+    handleInputChange(field, e){
+        console.log("On input Change")
+        this.props.updateCustomer(field, e)
+    }
+
     render(){
-        var columns = ['id', 'name', 'environment', 'dbUrl', 'dbUser', 'dbPassword', 'delete'];
-        var columnMeta = [{
-            "columnName": "delete",
-            "visible": true,
-            "customComponent": LinkComponent
-        }]
-
-        console.log("THIS CUST LENGTH > " + this.props.customers.length)
-
-        //console.log("Customerss >>")
-        //console.log(this.props.customers)
-        //var customers = this.props.customers.map(function(elem){
-        //    console.log("map")
-        //    console.log(typeof elem)
-        //    console.log(elem)
-        //    return(
-        //        <li key={elem.id}>{elem.name}</li>
-        //    )
-        //})
         var windowWidth = window.innerWidth
         return(
             <div>
@@ -93,7 +72,7 @@ class CustomerList extends React.Component {
                         header={<Cell>id</Cell>}
                         cell={<TextCell data={this.props.customers} col="id" />}
                         fixed={true}
-                        width={100}
+                        width={50}
                     />
                     <Column
                         header={<Cell>name</Cell>}
@@ -108,22 +87,29 @@ class CustomerList extends React.Component {
                     <Column
                         width={300}
                         header={<Cell>dbUrl</Cell>}
-                        cell={<TextCell data={this.props.customers} col="dbUrl" />}
+                        cell={<InputCell data={this.props.customers} handleChange={this.handleInputChange.bind(this, 'dbUrl')} col="dbUrl" />}
                     />
                     <Column
-                        width={200}
+                        width={100}
                         header={<Cell>dbUser</Cell>}
                         cell={<TextCell data={this.props.customers} col="dbUser" />}
                     />
                     <Column
-                        width={200}
+                        width={100}
                         header={<Cell>dbPassword</Cell>}
                         cell={<TextCell data={this.props.customers} col="dbPassword" />}
                     />
                     <Column
                         width={200}
-                        header={<Cell>Delete</Cell>}
-                        cell={<DeleteButton data={this.props.customers} deleteCustomer={this.deleteCustomer.bind(this)} col="delete" />}
+                        header={<Cell>Options</Cell>}
+                        cell={
+                                <OptionsCell
+                                    data={this.props.customers}
+                                    deleteCustomer={this.deleteCustomer.bind(this)}
+                                    updateCustomer={this.props.putCustomer}
+                                    col="delete"
+                                />
+                             }
                     />
                 </Table>
             </div>
@@ -133,15 +119,22 @@ class CustomerList extends React.Component {
 
 const TextCell = ({rowIndex, data, col, ...props}) => (
     <Cell {...props}>
-        {data[rowIndex][col]}
+        <span>{data[rowIndex][col]}</span>
     </Cell>
 );
 
-const DeleteButton = ({rowIndex, data, col, ...props}) => (
+const InputCell = ({rowIndex, data, col, ...props}) => (
     <Cell {...props}>
+        <input type="text" onChange={props.handleChange} value={data[rowIndex][col]} name={data[rowIndex].id}/>
+    </Cell>
+);
+
+const OptionsCell = ({rowIndex, data, col, ...props}) => (
+    <Cell {...props}>
+        <button id={data[rowIndex].id} onClick={props.updateCustomer}>Update {data[rowIndex].id}</button>
         <button id={data[rowIndex].id} onClick={props.deleteCustomer}>Delete {data[rowIndex].id}</button>
     </Cell>
-)
+);
 
 class LinkComponent extends React.Component {
     render(){

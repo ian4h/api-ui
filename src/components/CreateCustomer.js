@@ -20,7 +20,7 @@ class CreateCustomer extends React.Component {
 
     onFormSuccess(){
         console.log("On Form Success Method")
-        this.props.updateCustomers()
+        this.props.getCustomers()
     }
 
     handleFormSubmit(e){
@@ -50,7 +50,6 @@ class CreateCustomer extends React.Component {
     }
 
     render(){
-        console.log(this.state)
         return(
             <div className="customer-form">
                 <form action="" onSubmit={this.handleFormSubmit.bind(this)}>
