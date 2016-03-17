@@ -7,6 +7,7 @@ import ReactDom from "react-dom";
 import CreateCustomer from './CreateCustomer'
 import CustomerList from './CustomerList'
 import Nav from './Nav'
+import { IndexLink, Link } from 'react-router'
 
 class Layout extends React.Component {
 
@@ -17,7 +18,7 @@ class Layout extends React.Component {
             customers: []
         };
         this.layoutStyle = {
-            marginLeft: "200px"
+            margin: "50px"
         };
     }
 
@@ -44,6 +45,7 @@ class Layout extends React.Component {
         this.state.customers.forEach((cust) => {
             if(cust.id == e.currentTarget.id){
                 updatedCustomer = cust
+                $('#updating_'+updatedCustomer.id).show();
             }
         })
         var request = $.ajax({
@@ -57,6 +59,13 @@ class Layout extends React.Component {
         });
         request.success((data) => {
             console.log("Successful put >> ", data)
+            $('#updating_'+updatedCustomer.id).hide()
+            $('#updateOk_'+updatedCustomer.id).show().delay('5000').fadeOut();
+        });
+        request.fail((data) => {
+            console.log("Update Failed >> ", data)
+            $('#updating_'+updatedCustomer.id).hide()
+            $('#updateFailed_'+updatedCustomer.id).show().delay('5000').fadeOut();
         })
     }
 
@@ -70,15 +79,22 @@ class Layout extends React.Component {
                 console.log("Found it inpit >> ", cust)
                 cust[field] = event.target.value
             }
-        })
+        });
         this.setState(newState)
     }
 
     render() {
         return(
             <div style={this.layoutStyle}>
-                <Nav />
-                <h1>Application Header</h1>
+                <h1>API Customer Admin</h1>
+                <ul>
+                    <li>
+                        <IndexLink to="/">customer list</IndexLink>
+                    </li>
+                    <li>
+                        <Link to="createCustomer">create customer</Link>
+                    </li>
+                </ul>
                 {this.props.children && React.cloneElement(this.props.children,
                     {   customers: this.state.customers,
                         getCustomers: this.getCustomers.bind(this),

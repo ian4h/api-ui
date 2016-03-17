@@ -3,38 +3,32 @@
  */
 
 import React from 'react'
-//import {Table, Column, Cell} from 'fixed-data-table'
-//import { Griddle } from 'griddle-react'
-var FixedDataTable = require('fixed-data-table');
-const {Table, Column, Cell} = FixedDataTable;
-var Griddle = require('griddle-react');
-//import tableStyle from '../../node_modules/fixed-data-table/dist/fixed-data-table.css'
+import {Table, Column, Cell} from 'fixed-data-table'
 
 class CustomerList extends React.Component {
 
     constructor(props){
         super(props)
         this.state = {
-            customers: []
-        }
-    }
-
-    //componentWillReceiveProps(){
-    //    console.log("componentWillReceiveProps *****************************************************")
-    //    console.log(this.state)
-    //    this.setState({customers: this.props.customers})
-    //    console.log(this.state)
-    //    console.log("Pros custmoers ? ", this.props.customers)
-    //}
-
-    showCreateCustomer(e){
-        this.props.showList(false)
+            customers: [],
+            columnWidths: {
+                id: 50,
+                name: 200,
+                environment: 200,
+                dbUrl: 200,
+                dbUser: 100,
+                dbPassword: 100
+            }
+        };
+        this._onColumnResizeEndCallback = this._onColumnResizeEndCallback.bind(this);
     }
 
     deleteCustomer(e){
+        var id = e.currentTarget.id;
+        console.log(id);
         var request = $.ajax({
             type: 'DELETE',
-            url: 'http://localhost:8080/customers/'+e.currentTarget.id,
+            url: 'http://localhost:8080/customers/'+id,
             beforeSend: function(xhr) {
                 xhr.setRequestHeader('Authorization', 'Basic ' + btoa("username:password"))
             }
@@ -47,6 +41,8 @@ class CustomerList extends React.Component {
         request.fail((response) => {
             console.log("Failure")
             console.log(response)
+            console.log('#deleteFailed_'+id);
+            $('#deleteFailed_'+id).show().delay(5000).fadeOut()
         })
     }
 
@@ -55,11 +51,26 @@ class CustomerList extends React.Component {
         this.props.updateCustomer(field, e)
     }
 
+    _onColumnResizeEndCallback(newColumnWidth, columnKey){
+        console.log("_onColumnResizeEndCallback")
+        console.log("newColumnWidth : ", newColumnWidth)
+        console.log("ColumnKeY : ", columnKey)
+        console.log(this.state.columnWidths)
+        this.setState(({columnWidths}) => ({
+            columnWidths: {
+                ...columnWidths,
+                [columnKey]: newColumnWidth
+            }
+        }));
+        console.log(this.state.columnWidths)
+    }
+
     render(){
-        var windowWidth = window.innerWidth
+        var windowWidth = window.innerWidth;
+        var {columnWidths} = this.state;
+        console.log("Render");
         return(
             <div>
-                <button onClick={this.showCreateCustomer.bind(this)}>Create New Customer</button>
                 <h2>Customer List</h2>
                 <Table
                     rowHeight={50}
@@ -67,37 +78,54 @@ class CustomerList extends React.Component {
                     rowsCount={this.props.customers.length}
                     width={windowWidth - 250}
                     height={1000}
+                    onColumnResizeEndCallback={this._onColumnResizeEndCallback}
+                    isColumnResizing={false}
                     {...this.props}>
                     <Column
                         header={<Cell>id</Cell>}
                         cell={<TextCell data={this.props.customers} col="id" />}
+                        columnKey="id"
                         fixed={true}
-                        width={50}
+                        width={columnWidths.id}
+                        isResizable={true}
                     />
                     <Column
                         header={<Cell>name</Cell>}
-                        cell={<TextCell data={this.props.customers} col="name" />}
-                        width={200}
+                        columnKey="name"
+                        cell={<InputCell data={this.props.customers} handleChange={this.handleInputChange.bind(this, 'name')} col="name" />}
+                        width={columnWidths.name}
+                        isResizable={true}
                     />
                     <Column
                         header={<Cell>environment</Cell>}
-                        cell={<TextCell data={this.props.customers} col="environment" />}
-                        width={200}
+                        columnKey="environment"
+                        cell={<SelectCell data={this.props.customers} handleChange={this.handleInputChange.bind(this, 'environment')} col="environment" />}
+                        width={columnWidths.environment}
+                        isResizable={true}
                     />
                     <Column
-                        width={300}
+                        width={columnWidths.dbUrl}
                         header={<Cell>dbUrl</Cell>}
+                        columnKey="dbUrl"
+                        flexGrow={1}
                         cell={<InputCell data={this.props.customers} handleChange={this.handleInputChange.bind(this, 'dbUrl')} col="dbUrl" />}
+                        isResizable={true}
                     />
                     <Column
-                        width={100}
+                        width={columnWidths.dbUser}
+                        columnKey="dbUser"
                         header={<Cell>dbUser</Cell>}
-                        cell={<TextCell data={this.props.customers} col="dbUser" />}
+                        flexGrow={1}
+                        cell={<InputCell data={this.props.customers} handleChange={this.handleInputChange.bind(this, 'dbUser')} col="dbUser" />}
+                        isResizable={true}
                     />
                     <Column
-                        width={100}
+                        width={columnWidths.dbPassword}
                         header={<Cell>dbPassword</Cell>}
-                        cell={<TextCell data={this.props.customers} col="dbPassword" />}
+                        columnKey="dbPassword"
+                        flexGrow={1}
+                        cell={<InputCell data={this.props.customers} handleChange={this.handleInputChange.bind(this, 'dbPassword')} col="dbPassword" />}
+                        isResizable={true}
                     />
                     <Column
                         width={200}
@@ -125,24 +153,30 @@ const TextCell = ({rowIndex, data, col, ...props}) => (
 
 const InputCell = ({rowIndex, data, col, ...props}) => (
     <Cell {...props}>
-        <input type="text" onChange={props.handleChange} value={data[rowIndex][col]} name={data[rowIndex].id}/>
+        <input style={{width: props.width-20}} type="text" onChange={props.handleChange} value={data[rowIndex][col]} name={data[rowIndex].id}/>
+    </Cell>
+);
+
+const SelectCell = ({rowIndex, data, col, ...props}) => (
+    <Cell {...props} >
+        <select id="environment" onChange={props.handleChange} name={data[rowIndex].id} value={data[rowIndex][col]}>
+            <option value="dev">Dev</option>
+            <option value="test">Test</option>
+            <option value="prod">Prod</option>
+        </select>
     </Cell>
 );
 
 const OptionsCell = ({rowIndex, data, col, ...props}) => (
     <Cell {...props}>
-        <button id={data[rowIndex].id} onClick={props.updateCustomer}>Update {data[rowIndex].id}</button>
-        <button id={data[rowIndex].id} onClick={props.deleteCustomer}>Delete {data[rowIndex].id}</button>
+        <button id={data[rowIndex].id} onClick={props.updateCustomer}>Update</button>
+        <button id={data[rowIndex].id} onClick={props.deleteCustomer}>Delete</button>
+        <span id={'updating_'+data[rowIndex].id} style={{display: 'none'}}>Updating...</span>
+        <span id={'updateOk_'+data[rowIndex].id} style={{display: 'none'}}>Update ok</span>
+        <span id={'updateFailed_'+data[rowIndex].id} style={{display: 'none'}}>Update Failed</span>
+        <span id={'deleteFailed_'+data[rowIndex].id} style={{display: 'none'}}>Delete Failed</span>
     </Cell>
 );
 
-class LinkComponent extends React.Component {
-    render(){
-        console.log(this.props)
-        return(
-            <button>Delete {this.props.rowData.id}</button>
-        )
-    }
-}
 
 export default CustomerList
